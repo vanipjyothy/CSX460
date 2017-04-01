@@ -25,7 +25,19 @@ Write a function (f) that takes a vector of numbers, **x**, and returns a vector
 f <- function(x) {
   
   # ...
-  
+  len=length(x)#Length of input vector
+z=vector(mode="numeric",length=len)
+for (i in 1:len){
+      y=1
+      q=1
+      for(k in 1:len){
+        q=x[k]
+        if(i==k){q=1}
+        y=y*q
+      }
+  z[i]=y
+}
+return(z)
 }
 
 ```
@@ -51,6 +63,23 @@ Write a function f(x) to accept an integer vector, and returns a vector with tho
 ```{r}
 f <- function(x) {
   # ...
+  len=x 
+d=vector(,len)
+for (i in 1:len){
   
+  if(i %% 3 ==0 & i %% 5==0){
+    d[i]="FIZZBUZZ"
+  }
+  else if(i %% 3 ==0){
+    d[i]="FIZZ"
+  }
+  
+  else if(i %% 5 ==0){
+    d[i]="BUZZ"
+  }
+    else{d[i]=i}
+
+}
+return(d)
 }
 ```
