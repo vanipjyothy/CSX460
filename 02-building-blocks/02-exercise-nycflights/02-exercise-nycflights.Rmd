@@ -1,7 +1,12 @@
 ---
 title: "Assingment NYC Flight Data"
+<<<<<<< HEAD
 author: "Vani P Jyothy"
 date: "April 9 2017"
+=======
+author: "Your Name Here"
+date: "October 5, 2016"
+>>>>>>> upstream/master
 output: html_document
 ---
 
@@ -23,10 +28,15 @@ Put code in each of the sections provided.
 
 Using the `readr` package read the `flights` data.
 
+<<<<<<< HEAD
 ```{
 flights=read.csv("C:\\Users\\Vani\\Downloads\\UCB\\CSX460\\02-building-blocks\\02-exercise-nycflights\\ata\\flights.csv")
 
 }
+=======
+```{r}
+
+>>>>>>> upstream/master
 
 ```
 
@@ -34,6 +44,7 @@ flights=read.csv("C:\\Users\\Vani\\Downloads\\UCB\\CSX460\\02-building-blocks\\0
 
 Plot a histogram of arrival delays and departure delays 
 
+<<<<<<< HEAD
 ```{
 # hist of arrival Delay
 
@@ -57,6 +68,9 @@ hist(flights$arr_delay,
      las=1, 
      breaks=5) 
      }
+=======
+```{r}
+>>>>>>> upstream/master
 
 ```
 
@@ -64,6 +78,7 @@ hist(flights$arr_delay,
 
 Plot a scatterplot of date vs arrival delay 
 
+<<<<<<< HEAD
 ```{
 ##Adding a date variable by concatinationg year,month&Day
 
@@ -74,6 +89,9 @@ flights$date <- as.Date(with(flights, paste(year, month, day,sep="-")), "%Y-%m-%
 
 plot(flights$date,flights$arr_delay,main = "Scatter plot of date vs arrival delay",xlab = "Date", ylab = "Arrival Delay")
 }
+=======
+```{r}
+>>>>>>> upstream/master
 
 ```
 
@@ -83,6 +101,7 @@ plot(flights$date,flights$arr_delay,main = "Scatter plot of date vs arrival dela
 
 Create a `table`, counting the flights by origin airports and carrier.
 
+<<<<<<< HEAD
 ```{
 flights_dt=data.table(flights)
 flights_by_orig_carr=flights_dt[,.(count=.N),by=.(carrier,origin)]
@@ -95,9 +114,11 @@ flights_by_orig_carr=flights_dt[,.(count=.N),by=.(carrier,origin)]
 
 ```{
 
+flights_dt=fread("C:\\Users\\Vani\\Downloads\\UCB\\CSX460\\02-building-blocks\\02-exercise-nycflights\\data\\flights.csv")
+
 #reading the AIRPORT dataset
 
-airports=read.csv("C:\\Users\\Vani\\Downloads\\UCB\\CSX460\\02-building-blocks\\02-exercise-nycflights\\data\\airports.csv")
+airports_dt=fread("C:\\Users\\Vani\\Downloads\\UCB\\CSX460\\02-building-blocks\\02-exercise-nycflights\\data\\airports.csv")
 
 #storing the data in to datatable
 
@@ -105,20 +126,40 @@ airports_dt=data.table(airports)
 
 #Reading the PLANES data set
 
-planes=read.csv("C:\\Users\\Vani\\Downloads\\UCB\\CSX460\\02-building-blocks\\02-exercise-nycflights\\data\\planes.csv")
+planes_dt=fread("C:\\Users\\Vani\\Downloads\\UCB\\CSX460\\02-building-blocks\\02-exercise-nycflights\\data\\planes.csv")
 #storing the data in to datatable
 planes_dt=data.table(planes)
 
+planes_dt
+
 #reading the WEATHER dataset
-weather=read.csv("C:\\Users\\Vani\\Downloads\\UCB\\CSX460\\02-building-blocks\\02-exercise-nycflights\\data\\weather.csv")
+weather_dt=fread("C:\\Users\\Vani\\Downloads\\UCB\\CSX460\\02-building-blocks\\02-exercise-nycflights\\data\\weather.csv")
 
 #storing the data in to datatable
 weather_dt=data.table(weather)
 
 #Joining to make a single data table
 
-Aviation=left_join(flights_dt,airports_dt,by=c("origin"="faa")) %>% left_join(planes_dt) %>% left_join(weather_dt)
+Aviation=left_join(flights_dt,airports_dt,by=c("origin"="faa")) %>% left_join(planes_dt,by="tailnum") %>% left_join(weather_dt,by=c("origin","time_hour"))
+
+Aviation=left_join(flights_dt,weather_dt,by=c("origin","year","month","day","hour") ) %>%
+  left_join(planes_dt, by='tailnum') %>% 
+  left_join(airports_dt, by=c('origin'='faa') ) %>% 
+  left_join(airports_dt, by=c('dest'='faa') ) 
 }
+=======
+```{r}
+
+
+```
+
+
+## Join Data
+
+**Read** in the other data sets. Use methods to join the data together to create a single table containing one record per row.  (HINT: see `?data.table` or `?dplyr::join`)
+
+```{r}
+>>>>>>> upstream/master
 
 ```
 

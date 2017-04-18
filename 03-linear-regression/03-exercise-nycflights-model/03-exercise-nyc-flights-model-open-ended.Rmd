@@ -1,0 +1,50 @@
+---
+title: "NYCFlights: Arrival Delay Regression Model (Open Ended Variation)"
+author: "[Vani]"
+date: "[4/16/201]"
+output: html_document
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+```
+
+# NYCFlights Model
+
+Using the rectangular data that you created last week create a model for `arr_delay`. Follow a well defined process for creating a model as discussed in class or from one of the readings. 
+
+Break the process down into steps and create a codeblock for each step. 
+ - Use as many steps you feel as necessary
+ - Concisely explain each step 
+ - Show all work
+ 
+(You can start with the data that you created last week.)
+
+
+## Step 1: [Step Name] 
+
+```{
+model3=lm(arr_delay ~ visib +precip++humid+dewp+temp+month.x + day.x + dep_time + sched_dep_time+dep_delay+arr_time+sched_arr_time+carrier+origin+dest+air_time + distance,data=Aviation)
+
+
+summary(model3)
+}
+
+```
+## Step 2: [Step Name] 
+
+```{
+model4=lm(arr_delay ~ visib +precip+humid+temp+dep_delay+arr_time+carrier+origin+dest+air_time+sched_arr_time ,data=Aviation,na.action = na.omit)
+
+
+summary(model4)
+}
+
+```
+# Question:
+
+Is this a good model?  (Write your answer here.)
+
+Model have good R-Squared and Adjusted R-squared value.
+All the variables used in the model are significant.
+Minimum independent variables used
