@@ -1,0 +1,253 @@
+---
+title: "NYCFlights: Arrival Delay Logictic Model"
+author: "[Your Name]"
+date: "[Today's Date]"
+output: html_document
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+```
+
+#Loading the necessary libraries
+```{r,echo=FALSE}
+library(caTools)
+library("dplyr")
+library("data.table")
+library("ggplot2")
+
+
+
+```
+## Logsitic and Inverse Logistic Transformation 
+
+- Write an R function for the logistic function. The function should accept a `numeric` vector with values `[-Inf,Inf]` and produce a numeric vector in the the range `[0,1]`.
+
+```{r}
+sample_fun=function(x){
+  y=1/(1+exp(-x))
+  return(y)
+}
+
+sample_fun(c(-10:10))
+```
+
+
+- Plot the logistic function from  `[-10,10]`
+```{r}
+plot(sample_fun(c(-10:10)),c(-10:10))
+
+```
+
+- Write a R function for the inverse logistic function. The function should accept a `numeric` vector with values `[0,1]` and prodcuce a numeric vector in the range `[-Inf,Inf]`
+
+```{r}
+inv_log=function(x){
+  y=log(x/(1-x))
+  return(y)
+}
+
+inv_log(c(0:1))
+```
+
+- Plot the Inverse Logistic function from `[0,1]`
+```{r}
+g=seq(.02,.8,.001)
+
+plot(inv_log(g),g)
+```
+**Hint:** For plotting curves see `?graphics::curve` or `?ggplot2::stat_function`
+
+```{r "Logistic and Inverse Logistic" }
+
+```
+
+
+# NYCFlights Model
+
+Using the rectangular data that you created from the earlier assignment and following theexample from the text and class, create a model for arr_delay >= 22 minutes. Describe/Explain each of the steps and show all work.
+
+# Step 1
+```{r,echo=FALSE}
+
+flights_dt=fread("C:\\Users\\Vani\\Downloads\\UCB\\CSX460\\02-building-blocks\\02-exercise-nycflights\\data\\flights.csv")
+
+#reading the AIRPORT dataset
+
+airports_dt=fread("C:\\Users\\Vani\\Downloads\\UCB\\CSX460\\02-building-blocks\\02-exercise-nycflights\\data\\airports.csv")
+
+#Reading the PLANES data set
+
+planes_dt=fread("C:\\Users\\Vani\\Downloads\\UCB\\CSX460\\02-building-blocks\\02-exercise-nycflights\\data\\planes.csv")
+planes_dt
+
+#reading the WEATHER dataset
+weather_dt=fread("C:\\Users\\Vani\\Downloads\\UCB\\CSX460\\02-building-blocks\\02-exercise-nycflights\\data\\weather.csv")
+
+#Joining to make a single data table
+
+Aviation=left_join(flights_dt,weather_dt,by=c("origin","year","month","day","hour") ) %>%
+  left_join(planes_dt, by='tailnum') %>% 
+  left_join(airports_dt, by=c('origin'='faa') ) %>% 
+  left_join(airports_dt, by=c('dest'='faa') ) 
+
+```
+
+
+
+
+
+KNIT YOUR DOCUMENT AS *HTML* AND SUBMIT IT AND THE `Rmd` file to your repository.   
+```{r}
+
+Aviation_new=mutate(Aviation,arr_delay_22=ifelse(arr_delay>22,0,1))
+
+```
+#Step 2
+
+#Data preparation
+
+#Selecting the required variables
+```{r}
+Aviation1=Aviation_new[, c("arr_delay","arr_delay_22", "visib","precip","humid","temp","dep_delay","arr_time","carrier","origin","dest","air_time","sched_arr_time","month","distance")]
+
+```
+#Plotting the graph to understnad the skewness
+
+```{r}
+qplot(Aviation1$arr_delay)
+```
+
+#Find the corelation matrics
+```{r}
+numeric_column=Aviation1 %>% sapply(is.numeric) %>%  which() %>% names()
+Aviation1[,numeric_column,] %>% cor(use="pairwise.complete.obs")
+
+```
+
+Sheduled_arr_time and dep_delay is highly correlated.
+Sheduled_arr_time and arr_time is highly corelated
+
+
+
+
+#Step 3
+Splitting the data in to testing and training set
+```{r}
+set.seed(1000)
+
+split=sample.split(Aviation1$arr_delay_22,SplitRatio = .65)
+train=subset(Aviation1,split==TRUE)
+test=subset(Aviation1,split==FALSE)
+  
+```
+
+
+# Step 4
+
+Applying the log4istic function
+
+```{r}
+Aviation1_Log=glm(arr_delay_22 ~ dep_delay+carrier+air_time+visib+precip+temp+humid ,data=train,family = binomial)
+
+summary(Aviation1_Log)
+
+```
+#Step 5
+
+Prdictions on test set
+
+```{r}
+predicttest=predict(Aviation1_Log,type="response",newdata = test)
+
+#Creating confusion Matrics to measure accuracy
+table(test$arr_delay_22,predicttest>.5)
+
+
+
+```
+
+#Step 6 Accuracy of prediction
+```{r}
+
+#Accuracy
+
+(15527+90055)/(15527+6529+2019+90055)
+```
+Accuracy
+
+
+#Step 7
+Comparing with the Navie model
+
+```{r}
+#Most frequent outcome here is that there wont be delay which is greater than 22 min
+#Accuracy of the baseline model
+(15527+6529)/(15527+6529+2019+90055)
+
+```
+
+# Question:
+
+Is this a good model?
+
+Yes,Because the accuracy of the model created is 93%,but the accuracy of the navie model is just 19 %.
+
+# PART B:
+
+Your model should be good at explaining tardiness. Now, assume that your job is to predict arrival delays a month in advance. You can no longer use all the features in your model. Retrain your model using only features that will be *known* only a month in advance of the departure time.  Show all steps as above.
+
+Following attributes will be available a month in advance:
+
+carrier+air_time+visib+precip+temp+humid
+
+#Step 1
+
+Creating a new model based on the known attributes
+
+```{r}
+Aviation1_LogB=glm(arr_delay_22 ~ carrier+air_time+visib+precip+temp+humid ,data=train,family = binomial)
+
+summary(Aviation1_LogB)
+
+```
+#Step 2
+
+Prdictions on test set
+
+```{r}
+predicttestB=predict(Aviation1_LogB,type="response",newdata = test)
+
+#Creating confusion Matrics to measure accuracy
+table(test$arr_delay_22,predicttestB>.5)
+
+
+
+```
+
+#Step 3 Accuracy of prediction
+```{r}
+
+#Accuracy
+
+(375+91602)/(375+21681+472+91602)
+```
+Accuracy
+
+
+#Step 4
+Comparing with the Navie model
+
+```{r}
+#Most frequent outcome here is that there wont be delay which is greater than 22 min
+#Accuracy of the baseline model
+(375+21681)/(375+21681+472+91602)
+
+```
+
+# Question:
+
+Is this a good model?
+
+Yes,Because the accuracy of the model created is 91%,but the accuracy of the navie model is just 19 %.
+

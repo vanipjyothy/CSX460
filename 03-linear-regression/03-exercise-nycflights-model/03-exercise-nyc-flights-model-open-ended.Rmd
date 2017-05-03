@@ -20,24 +20,99 @@ Break the process down into steps and create a codeblock for each step.
  
 (You can start with the data that you created last week.)
 
+##Load the necessary packages:
+library(readr)
+library(ggplot2)
+library(magrittr)
+library(lubridate)
+library(stringr)
+library(dplyr)
+library(data.table)
 
-## Step 1: [Step Name] 
+## Step 1: [Read the data] 
 
 ```{
-model3=lm(arr_delay ~ visib +precip++humid+dewp+temp+month.x + day.x + dep_time + sched_dep_time+dep_delay+arr_time+sched_arr_time+carrier+origin+dest+air_time + distance,data=Aviation)
+flights_dt=fread("C:\\Users\\Vani\\Downloads\\UCB\\CSX460\\02-building-blocks\\02-exercise-nycflights\\data\\flights.csv")
+
+##reading the AIRPORT dataset
+
+airports_dt=fread("C:\\Users\\Vani\\Downloads\\UCB\\CSX460\\02-building-blocks\\02-exercise-nycflights\\data\\airports.csv")
 
 
-summary(model3)
+#Reading the PLANES data set
+
+planes_dt=fread("C:\\Users\\Vani\\Downloads\\UCB\\CSX460\\02-building-blocks\\02-exercise-nycflights\\data\\planes.csv")
+
+
+#reading the WEATHER dataset
+weather_dt=fread("C:\\Users\\Vani\\Downloads\\UCB\\CSX460\\02-building-blocks\\02-exercise-nycflights\\data\\weather.csv")
+
+
+#Joining to make a single data table
+
+Aviation=left_join(flights_dt,weather_dt,by=c("origin","year","month","day","hour") ) %>%
+  left_join(planes_dt, by='tailnum') %>% 
+  left_join(airports_dt, by=c('origin'='faa') ) %>% 
+  left_join(airports_dt, by=c('dest'='faa') ) 
+  
+  
+  YX <- 
+  flights_dt %>% 
+  left_join(weather_dt, by=c("origin","year","month","day","hour") ) %>%
+  left_join(planes_dt, by='tailnum', suffixes=c('','.pl') ) %>% 
+  left_join(airports_dt, by=c('origin'='faa') ) %>% 
+  left_join(airports_dt, by=c('dest'='faa') )    
+
+prefix_names <- function(x,prefix) { 
+  setnames(x, names(x), paste0(prefix,names(x))) 
+  return(invisible(x)) 
+
 }
 
 ```
-## Step 2: [Step Name] 
+## Step 2: [Exploring the data] 
 
 ```{
-model4=lm(arr_delay ~ visib +precip+humid+temp+dep_delay+arr_time+carrier+origin+dest+air_time+sched_arr_time ,data=Aviation,na.action = na.omit)
+
+ yx=YX %>% sample_n(10000)
+y="arr_delay"
+xs=c('month','dep_delay','carrier','air_time','distance'
+,'year.x','type','engine'
+,'wind_dir','wind_speed','wind_gust','precip','pressure','visib'
+,'lat.x','lon.x','lat.y','lon.y'
+)
+
+yx <- yx[ , c(y,xs), with=FALSE ]
 
 
-summary(model4)
+qqnorm(yx %>% sample_n(1000) %>% extract2("arr_delay"))
+qplot(yx$arr_delay)
+
+yx=yx[arr_delay>=quantile(arr_delay,.01,na.rm=TRUE) & arr_delay<quantile(arr_delay,.09,na.rm=TRUE)]
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
 }
 
 ```
