@@ -1,14 +1,26 @@
 ---
 title: "Classification Mettrics"
-author: "Christopher Brown"
+author: "Vani P Jyothy"
 date: "October 5, 2015"
-output: html_document
+output:
+  html_document: default
+  pdf_document: default
 ---
 
 
 **KNIT YOUR DOCUMENT AS *HTML* AND SUBMIT IT AND THE `Rmd` file.** 
  
 
+#Loading the necessary libraries
+```{r,echo=FALSE}
+library(caTools)
+library("dplyr")
+library("data.table")
+library("ggplot2")
+
+
+
+```
 ## Classification Metrics Functions 
 
 Write functions of `y` and `y_hat` to calculate the following classification metrics
@@ -25,21 +37,203 @@ Write functions of `y` and `y_hat` to calculate the following classification met
 * Accuracy
 * Kappa
 
-```{r "definitions", echo=FALSE}
 
+1)True Positive Rate
+
+```{r}
+test_fun=function(y,y_hat,matric)
+{
+if(matric=="TPRA"){
+z=table(y,y_hat>.5)  
+x=z[1,1]/(z[1,1]+z[1,2])
+return(x)
+}
+  
+  if(matric=="FPRA"){
+z=table(y,y_hat>.5)  
+x=z[2,1]/(z[2,1]+z[2,2])
+return(x)
+  }
+  
+  if(matric=="TNRA"){
+z=table(y,y_hat>.5)  
+x=z[2,2]/(z[2,1]+z[2,2])
+return(x)
+  }
+  
+  if(matric=="FNRA"){
+z=table(y,y_hat>.5)  
+x=z[1,2]/(z[1,1]+z[1,2])
+return(x)
+  }
+  
+  if(matric=="sensitivity"){
+z=table(y,y_hat>.5)  
+x=z[1,1]/(z[1,1]+z[1,2])
+return(x)
+  }
+  
+  if(matric=="specificity"){
+z=table(y,y_hat>.5)  
+x=z[2,2]/(z[2,1]+z[2,2])
+return(x)
+  }
+  
+  if(matric=="recall"){
+z=table(y,y_hat>.5)  
+x=z[1,1]/(z[1,1]+z[1,2])
+return(x)
+  }
+  
+  if(matric=="precision"){
+z=table(y,y_hat>.5)  
+x=z[1,1]/(z[1,1]+z[2,1])
+return(x)
+  }
+  
+  if(matric=="prevalance"){
+z=table(y,y_hat>.5)  
+x=(z[1,1]+z[1,2])/(z[1,1]+z[1,2]+z[2,1]+z[2,2])
+return(x)
+  }
+  
+  if(matric=="accuracy"){
+z=table(y,y_hat>.5)  
+x=(z[1,1]+z[2,2])/(z[1,1]+z[1,2]+z[2,1]+z[2,2])
+return(x)}
+}
 
 ```
 
 Note that the `echo = FALSE` parameter was added to the code chunk to prevent printing of the R code that generated the plot.
 
 
+
+# Step 1
+```{r,echo=FALSE}
+
+flights_dt=fread("C:\\Users\\Vani\\Downloads\\UCB\\CSX460\\02-building-blocks\\02-exercise-nycflights\\data\\flights.csv")
+
+#reading the AIRPORT dataset
+
+airports_dt=fread("C:\\Users\\Vani\\Downloads\\UCB\\CSX460\\02-building-blocks\\02-exercise-nycflights\\data\\airports.csv")
+
+#Reading the PLANES data set
+
+planes_dt=fread("C:\\Users\\Vani\\Downloads\\UCB\\CSX460\\02-building-blocks\\02-exercise-nycflights\\data\\planes.csv")
+planes_dt
+
+#reading the WEATHER dataset
+weather_dt=fread("C:\\Users\\Vani\\Downloads\\UCB\\CSX460\\02-building-blocks\\02-exercise-nycflights\\data\\weather.csv")
+
+#Joining to make a single data table
+
+Aviation=left_join(flights_dt,weather_dt,by=c("origin","year","month","day","hour") ) %>%
+  left_join(planes_dt, by='tailnum') %>% 
+  left_join(airports_dt, by=c('origin'='faa') ) %>% 
+  left_join(airports_dt, by=c('dest'='faa') ) 
+
+
+Aviation_new=mutate(Aviation,arr_delay_22=ifelse(arr_delay>22,0,1))
+
+#Step 2
+
+#Data preparation
+
+#Selecting the required variables
+
+Aviation1=Aviation_new[, c("arr_delay","arr_delay_22", "visib","precip","humid","temp","dep_delay","arr_time","carrier","origin","dest","air_time","sched_arr_time","month","distance")]
+
+
+#Splitting the data in to testing and training set
+set.seed(1000)
+
+split=sample.split(Aviation1$arr_delay_22,SplitRatio = .65)
+train=subset(Aviation1,split==TRUE)
+test=subset(Aviation1,split==FALSE)
+
+
+
+# Step 4
+
+#Applying the log4istic function
+
+Aviation1_Log=glm(arr_delay_22 ~ dep_delay+carrier+air_time+visib+precip+temp+humid ,data=train,family = binomial)
+
+
+#Step 5
+
+#Prdictions on test set
+
+predicttest=predict(Aviation1_Log,type="response",newdata = test)
+```
 ## Usage 
 
-Use the function(s) above to calculate the metrics for your late arrival model that
-you created last week. 
-
-```{r "evaluations"}
-
+```{r}
+test_fun(test$arr_delay_22,predicttest,"sensitivity")
 
 ```
 
+
+
+#True Positive Rate
+```{r}
+
+test_fun(test$arr_delay_22,predicttest,"TPRA")
+
+```
+#False Positive Rate
+
+```{r}
+test_fun(test$arr_delay_22,predicttest,"FPRA")
+
+```
+# True Negative Rate  
+
+```{r}
+test_fun(test$arr_delay_22,predicttest,"TNRA")
+
+```
+* False Negative Rate 
+
+```{r}
+
+test_fun(test$arr_delay_22,predicttest,"FNRA")
+
+```
+* Sensitivity 
+```{r}
+
+test_fun(test$arr_delay_22,predicttest,"sensitivity")
+```
+
+* Specificity 
+
+```{r}
+test_fun(test$arr_delay_22,predicttest,"specificity")
+
+```
+* Recall 
+
+```{r}
+test_fun(test$arr_delay_22,predicttest,"recall")
+
+```
+* Precision
+```{r}
+test_fun(test$arr_delay_22,predicttest,"precision")
+
+```
+* Prevalence 
+
+```{r}
+test_fun(test$arr_delay_22,predicttest,"prevalance")
+
+```
+* Accuracy
+
+```{r}
+test_fun(test$arr_delay_22,predicttest,"accuracy")
+
+```
+* Kappa

@@ -1,6 +1,6 @@
 ---
 title: "Resampling"
-author: "Your Name Here"
+author: "Vani P jyothy"
 date: "October 5, 2015"
 output: html_document
 ---
@@ -15,17 +15,101 @@ output: html_document
 - Calculte the `sd( mean(x) )` using the **using 10-fold resampling**.  Create your own folds, show your work.
 - Calculte the `sd( mean(x) )` using the **using 10 bootstrap sample**.  Create your own folds, show your work. 
 
+##10 fold bootstrap
 ```{r}
 set.seed(1) 
+
 x <- runif(20,1,20)
 
-sd_cv # <- Your work here 
+mn <- vector(mode="numeric", length=10)
+std <- vector(mode="numeric", length=10)
+for(i in 1:10)
+{
+y=sample(x,10,replace=TRUE)
+mn[i]=mean(y)
+std[i]=sd(y)
+}
 
-sd_boot # <- Your work here
+```
+#SD of individual samples
+```{r}
+std
+```
+#Mean of individual samples
+```{r}
+mn
+```
+#Mean of the original vectior X after sampling
+```{r}
+mean(mn)
+
+```
+#SD of the original vector X after sampling
+```{r}
+mean(std)
+
+```
+#Mean with out samapling
+```{r}
+mean(x)
+
+```
+#SD without resampling
+
+```{r}
+sd(x)
+
+```
+
+##10 fold cross sampling
+
+```{r}
+set.seed(1) 
+
+x <- runif(20,1,20)
+mnc <- vector(mode="numeric", length=10)
+c <- vector(mode="numeric", length=10)
+for(j in 1:10)
+{
+z=sample(x,10,replace=FALSE)
+mnc[j]=mean(z);
+c[j]=sd(z)
+}
+
+```
+#SD of individual sample
+```{r}
+c
+
+```
+#Mean of individual sample
+```{r}
+mnc
+```
+#Mean of the original vectior X after sampling
+```{r}
+mean(mnc)
+
+```
+#SD of the original vector X after sampling
+```{r}
+mean(c)
+
+```
+#Mean with out resmapling
+```{r}
+mean(x)
+
+```
+#SD without resampling
+
+```{r}
+sd(x)
+
 ```
 
 
 ### Your answers here: 
 
-- sd_cv   is: `r sd_cv`
-- sd_boot is: `r sd_boot`
+- sd_cv   is: 5.516
+- sd_boot is: 5.205
